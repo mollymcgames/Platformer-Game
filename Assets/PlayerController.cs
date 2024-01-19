@@ -4,18 +4,27 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+
+    private Rigidbody2D rb; // reference to the rigidbody component
+
     // Start is called before the first frame update
     void Start()
     {
+        rb = GetComponent<Rigidbody2D>(); // get the rigidbody component
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
+
+        // allow the player to move left and right
+        float dirX = Input.GetAxisRaw("Horizontal"); // get the horizontal input
+        rb.velocity = new Vector2(dirX * 7f, rb.velocity.y); // move the player in the x direction
         // allow the player to jump
-        if (Input.GetKeyDown("space"))
+        if (Input.GetButtonDown("Jump"))
         {
-            GetComponent<Rigidbody2D>().velocity = new Vector3(0, 10, 0); //only jump in y direction
+            // rb.velocity = new Vector2(rb.velocity.x, 10f); //only jump in y direction
+            rb.AddForce(new Vector2(rb.velocity.x, 10f), ForceMode2D.Impulse); // jump in both x and y direction
         }
     }
 }
