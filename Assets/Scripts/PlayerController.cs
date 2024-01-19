@@ -6,8 +6,11 @@ public class PlayerController : MonoBehaviour
 {
 
     private Rigidbody2D rb; // reference to the rigidbody component
+    private BoxCollider2D bc; // reference to the box collider component
     private SpriteRenderer sr; // reference to the sprite renderer component
     private Animator anim; // reference to the animator component
+
+    [SerializeField] private LayerMask groundJumpable; // layer mask for the ground
 
     private float dirX = 0f; // direction of the player
     [SerializeField] private float speed = 7f; // speed of the player
@@ -19,6 +22,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>(); // get the rigidbody component
+        bc = GetComponent<BoxCollider2D>(); // get the box collider component
         sr = GetComponent<SpriteRenderer>(); // get the sprite renderer component
         anim = GetComponent<Animator>(); // get the animator component
     }
@@ -31,7 +35,7 @@ public class PlayerController : MonoBehaviour
         dirX = Input.GetAxisRaw("Horizontal"); // get the horizontal input
         rb.velocity = new Vector2(dirX * speed, rb.velocity.y); // move the player in the x direction
         // allow the player to jump
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && IsGrounded()) // if the player presses the jump button and is on the ground
         {
             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse); // jump in both x and y direction
         }
@@ -72,6 +76,12 @@ public class PlayerController : MonoBehaviour
 
         anim.SetInteger("state", (int)state); // set the state parameter to the state variable
 
+    }
+
+    private bool IsGrounded()
+    {
+        // check if the player is on the ground
+        return Physics2D.BoxCast(bc.bounds.center, bc.bounds.size, 0f, Vector2.down, .1f, groundJumpable); // cast a box down to the ground
     }
 
 }
