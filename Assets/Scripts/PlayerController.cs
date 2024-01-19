@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float speed = 7f; // speed of the player
     [SerializeField] private float jumpForce = 10f; // force of the player's jump
 
+    private enum MovementState { idle, running, jumping, falling } // states of the player
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,19 +42,36 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateSprite()
     {
+
+        MovementState state; // create a variable to store the state of the player
         if (dirX > 0f)
         {
-            anim.SetBool("isRunning", true); // set the isRunning parameter to true
+            state = MovementState.running; // set the state to running
+            // anim.SetBool("isRunning", true); // set the isRunning parameter to true
             sr.flipX = false; // don't flip the sprite
         }
         else if (dirX < 0f) //moving left
         {
-            anim.SetBool("isRunning", true); // set the isRunning parameter to true
+            state = MovementState.running; // set the state to running
             sr.flipX = true; // flip the sprite
         }
         else
         {
-            anim.SetBool("isRunning", false); // set the isRunning parameter to false
+            state = MovementState.idle; // set the state to idle
+            // anim.SetBool("isRunning", false); // set the isRunning parameter to false        }
         }
+
+        if (rb.velocity.y > .1f)
+        {
+            state = MovementState.jumping; // set the state to jumping
+        }
+        else if (rb.velocity.y < -.1f)
+        {
+            state = MovementState.falling; // set the state to falling
+        }
+
+        anim.SetInteger("state", (int)state); // set the state parameter to the state variable
+
     }
+
 }
