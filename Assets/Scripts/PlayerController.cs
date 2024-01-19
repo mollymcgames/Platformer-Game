@@ -25,6 +25,12 @@ public class PlayerController : MonoBehaviour
         bc = GetComponent<BoxCollider2D>(); // get the box collider component
         sr = GetComponent<SpriteRenderer>(); // get the sprite renderer component
         anim = GetComponent<Animator>(); // get the animator component
+
+
+        //Set the friction to zero so the player doesn't stick
+        PhysicsMaterial2D frictionlessMaterial = new PhysicsMaterial2D();
+        frictionlessMaterial.friction = 0f;
+        bc.sharedMaterial = frictionlessMaterial;
     }
 
     // Update is called once per frame
