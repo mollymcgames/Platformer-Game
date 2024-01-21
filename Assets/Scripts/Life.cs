@@ -9,21 +9,14 @@ public class Life : MonoBehaviour
     private SpriteRenderer spriteRenderer; // reference to the sprite renderer component
     private bool isAlive = true; // flag to track player's life status
 
+    [SerializeField] private AudioSource deathSound; // sound to play when the player dies
+
     // Start is called before the first frame update
     private void Start()
     {
         anim = GetComponent<Animator>(); // get the animator component
         rb = GetComponent<Rigidbody2D>(); // get the rigidbody component
         spriteRenderer = GetComponent<SpriteRenderer>(); // get the sprite renderer component
-    }
-
-    private void Update()
-    {
-        // Check if the player is alive before allowing input or movement
-        if (isAlive)
-        {
-            // Your player input and movement code here
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -36,10 +29,11 @@ public class Life : MonoBehaviour
 
     private void Die()
     {
+        deathSound.Play(); // play the death sound
         // Set the flag to indicate the player is no longer alive
         isAlive = false;
 
-        // Optionally, play death animation or perform other actions
+        // Optionally, play death animation
         anim.SetTrigger("death");
 
         // Disable the sprite renderer after a delay
@@ -48,7 +42,6 @@ public class Life : MonoBehaviour
         // Freeze the position by setting constraints
         rb.constraints = RigidbodyConstraints2D.FreezePosition;        
 
-        // Optionally, you can add a delay before reloading the level
         StartCoroutine(ReloadLevelWithDelay(2f));
     }
 

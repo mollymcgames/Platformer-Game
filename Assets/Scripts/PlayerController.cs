@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
 
     private enum MovementState { idle, running, jumping, falling } // states of the player
 
+    [SerializeField] private AudioSource jumpSound; // sound to play when the player jumps
+
     // Start is called before the first frame update
     void Start()
     {
@@ -44,6 +46,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Jump") && IsGrounded()) // if the player presses the jump button and is on the ground
         {
             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse); // jump in both x and y direction
+            jumpSound.Play(); // play the jump sound
         }
 
         UpdateSprite(); // update the animation state
