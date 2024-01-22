@@ -1004,7 +1004,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.035440624, y: -0.2569443}
+  m_Offset: {x: 0.026338816, y: -0.29335093}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -1014,7 +1014,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.0076638, y: 1.3797896}
+  m_Size: {x: 0.8256302, y: 1.4526033}
   m_EdgeRadius: 0
 --- !u!50 &434536454
 Rigidbody2D:
@@ -1110,6 +1110,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deathSound: {fileID: 434536461}
+  cameraController: {fileID: 519420033}
 --- !u!82 &434536459
 AudioSource:
   m_ObjectHideFlags: 0

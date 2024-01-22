@@ -11,6 +11,10 @@ public class Life : MonoBehaviour
 
     [SerializeField] private AudioSource deathSound; // sound to play when the player dies
 
+    private bool hasDied = false; // flag to track if the player has died
+
+    [SerializeField] private CameraController cameraController; // reference to the camera controller component
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -21,6 +25,8 @@ public class Life : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (!isAlive || hasDied) return; // Check if the player is already dead or has already died
+
         if (collision.gameObject.CompareTag("spikes"))
         {
             Die();
@@ -29,9 +35,9 @@ public class Life : MonoBehaviour
 
     private void Die()
     {
+        hasDied = true; // Set the flag to indicate the player has died
+
         deathSound.Play(); // play the death sound
-        // Set the flag to indicate the player is no longer alive
-        isAlive = false;
 
         // Optionally, play death animation
         anim.SetTrigger("death");
@@ -40,7 +46,12 @@ public class Life : MonoBehaviour
         StartCoroutine(DisableSpriteRendererWithDelay(1f));
 
         // Freeze the position by setting constraints
-        rb.constraints = RigidbodyConstraints2D.FreezePosition;        
+        rb.constraints = RigidbodyConstraints2D.FreezePosition;
+
+        if (cameraController != null)
+        {
+            cameraController.StopFollowingPlayer(); // stop the camera from following the player
+        }        
 
         StartCoroutine(ReloadLevelWithDelay(2f));
     }
