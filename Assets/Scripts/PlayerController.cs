@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
 
     [SerializeField] private LayerMask groundJumpable;
+    [SerializeField] private float wallCheckDistance = 0.2f; // Adjust the distance as needed
 
     private float dirX = 0f;
     [SerializeField] private float speed = 7f;
@@ -18,7 +19,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioSource jumpSound;
 
     private bool isAttacking = false;
-
 
     void Start()
     {
@@ -35,6 +35,13 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         dirX = Input.GetAxisRaw("Horizontal");
+
+        // Check for wall collisions
+        if (IsTouchingWall() && Mathf.Abs(dirX) > 0)
+        {
+            dirX = 0f; // Prevent horizontal movement if touching a wall
+        }
+
         rb.velocity = new Vector2(dirX * speed, rb.velocity.y);
 
         if (Input.GetButtonDown("Jump") && IsGrounded())
@@ -53,12 +60,11 @@ public class PlayerController : MonoBehaviour
 
     private void Attack()
     {
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Death")) return; // Do not attack if the player has died or is in the death animation
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Death")) return;
         anim.SetTrigger("attack");
         StartCoroutine(ResetAttack());
     }
 
-    // Coroutine to reset the attack trigger after the attack animation duration
     private IEnumerator ResetAttack()
     {
         float attackAnimationDuration = anim.GetCurrentAnimatorClipInfo(0)[0].clip.length;
@@ -103,6 +109,14 @@ public class PlayerController : MonoBehaviour
     private bool IsGrounded()
     {
         return Physics2D.BoxCast(bc.bounds.center, bc.bounds.size, 0f, Vector2.down, .1f, groundJumpable);
+    }
+
+    private bool IsTouchingWall()
+    {
+        RaycastHit2D hitRight = Physics2D.Raycast(transform.position, Vector2.right, wallCheckDistance, groundJumpable);
+        RaycastHit2D hitLeft = Physics2D.Raycast(transform.position, Vector2.left, wallCheckDistance, groundJumpable);
+
+        return hitRight.collider != null || hitLeft.collider != null;
     }
 
     private enum MovementState { idle, running, jumping, falling }
