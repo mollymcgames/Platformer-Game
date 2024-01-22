@@ -4,93 +4,106 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private Rigidbody2D rb;
+    private BoxCollider2D bc;
+    private SpriteRenderer sr;
+    private Animator anim;
 
-    private Rigidbody2D rb; // reference to the rigidbody component
-    private BoxCollider2D bc; // reference to the box collider component
-    private SpriteRenderer sr; // reference to the sprite renderer component
-    private Animator anim; // reference to the animator component
+    [SerializeField] private LayerMask groundJumpable;
 
-    [SerializeField] private LayerMask groundJumpable; // layer mask for the ground
+    private float dirX = 0f;
+    [SerializeField] private float speed = 7f;
+    [SerializeField] private float jumpForce = 10f;
 
-    private float dirX = 0f; // direction of the player
-    [SerializeField] private float speed = 7f; // speed of the player
-    [SerializeField] private float jumpForce = 10f; // force of the player's jump
+    [SerializeField] private AudioSource jumpSound;
 
-    private enum MovementState { idle, running, jumping, falling } // states of the player
+    private bool isAttacking = false;
 
-    [SerializeField] private AudioSource jumpSound; // sound to play when the player jumps
 
-    // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>(); // get the rigidbody component
-        bc = GetComponent<BoxCollider2D>(); // get the box collider component
-        sr = GetComponent<SpriteRenderer>(); // get the sprite renderer component
-        anim = GetComponent<Animator>(); // get the animator component
+        rb = GetComponent<Rigidbody2D>();
+        bc = GetComponent<BoxCollider2D>();
+        sr = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
 
-
-        //Set the friction to zero so the player doesn't stick
         PhysicsMaterial2D frictionlessMaterial = new PhysicsMaterial2D();
         frictionlessMaterial.friction = 0f;
         bc.sharedMaterial = frictionlessMaterial;
     }
 
-    // Update is called once per frame
     private void Update()
     {
+        dirX = Input.GetAxisRaw("Horizontal");
+        rb.velocity = new Vector2(dirX * speed, rb.velocity.y);
 
-        // allow the player to move left and right
-        dirX = Input.GetAxisRaw("Horizontal"); // get the horizontal input
-        rb.velocity = new Vector2(dirX * speed, rb.velocity.y); // move the player in the x direction
-        // allow the player to jump
-        if (Input.GetButtonDown("Jump") && IsGrounded()) // if the player presses the jump button and is on the ground
+        if (Input.GetButtonDown("Jump") && IsGrounded())
         {
-            rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse); // jump in both x and y direction
-            jumpSound.Play(); // play the jump sound
+            rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+            jumpSound.Play();
         }
 
-        UpdateSprite(); // update the animation state
+        if (Input.GetMouseButtonDown(1) && !isAttacking)
+        {
+            Attack();
+        }
 
+        UpdateSprite();
+    }
+
+    private void Attack()
+    {
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Death")) return; // Do not attack if the player has died or is in the death animation
+        anim.SetTrigger("attack");
+        StartCoroutine(ResetAttack());
+    }
+
+    // Coroutine to reset the attack trigger after the attack animation duration
+    private IEnumerator ResetAttack()
+    {
+        float attackAnimationDuration = anim.GetCurrentAnimatorClipInfo(0)[0].clip.length;
+
+        yield return new WaitForSeconds(attackAnimationDuration);
+
+        anim.ResetTrigger("attack");
+        isAttacking = false;
     }
 
     private void UpdateSprite()
     {
+        MovementState state;
 
-        MovementState state; // create a variable to store the state of the player
         if (dirX > 0f)
         {
-            state = MovementState.running; // set the state to running
-            // anim.SetBool("isRunning", true); // set the isRunning parameter to true
-            sr.flipX = false; // don't flip the sprite
+            state = MovementState.running;
+            sr.flipX = false;
         }
-        else if (dirX < 0f) //moving left
+        else if (dirX < 0f)
         {
-            state = MovementState.running; // set the state to running
-            sr.flipX = true; // flip the sprite
+            state = MovementState.running;
+            sr.flipX = true;
         }
         else
         {
-            state = MovementState.idle; // set the state to idle
-            // anim.SetBool("isRunning", false); // set the isRunning parameter to false        }
+            state = MovementState.idle;
         }
 
         if (rb.velocity.y > .1f)
         {
-            state = MovementState.jumping; // set the state to jumping
+            state = MovementState.jumping;
         }
         else if (rb.velocity.y < -.1f)
         {
-            state = MovementState.falling; // set the state to falling
+            state = MovementState.falling;
         }
 
-        anim.SetInteger("state", (int)state); // set the state parameter to the state variable
-
+        anim.SetInteger("state", (int)state);
     }
 
     private bool IsGrounded()
     {
-        // check if the player is on the ground
-        return Physics2D.BoxCast(bc.bounds.center, bc.bounds.size, 0f, Vector2.down, .1f, groundJumpable); // cast a box down to the ground
+        return Physics2D.BoxCast(bc.bounds.center, bc.bounds.size, 0f, Vector2.down, .1f, groundJumpable);
     }
 
+    private enum MovementState { idle, running, jumping, falling }
 }
